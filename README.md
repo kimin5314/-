@@ -512,7 +512,7 @@ TODO
 
 ```javascript
 const data = {
-    phone: 11122223333,
+    phone: "11122223333",
 }
 fetch("http://kimin.cn:8080/user/login", {
     method: "POST",
