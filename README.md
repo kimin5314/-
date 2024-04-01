@@ -198,45 +198,47 @@
 
 #### user(用户表, 用户基本信息)
 
- ```sql
- create table user
- (
-     id         int auto_increment
-         primary key,
-     phone      char(11) null,
-     name       varchar(255) null,
-     avatar     varchar(255) null,
-     role       varchar(255) null,
-     created_at datetime default CURRENT_TIMESTAMP null,
-     updated_at datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP
- );
- ```
+```sql
+create table user
+(
+    id         int auto_increment
+        primary key,
+    phone      char(11) null,
+    name       varchar(255) null,
+    avatar     varchar(255) null,
+    role       varchar(255) null,
+    created_at datetime default CURRENT_TIMESTAMP null,
+    updated_at datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP
+        constraint user_pk
+        unique (phone)
+);
+```
 
 #### resource(资源表, 资源基本信息)
 
- ```sql
- create table resource
- (
-     id          int auto_increment
-         primary key,
-     name        varchar(255) null,
-     type        varchar(255) null,
-     duration    varchar(255) null,
-     user_id     int null,
-     description text null,
-     price       decimal(10, 2) null,
-     view        int null,
-     created_at  datetime default CURRENT_TIMESTAMP null,
-     updated_at  datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
-     constraint resource_pk
-         unique (name, user_id),
-     constraint resource_ibfk_1
-         foreign key (user_id) references user (id)
- );
+```sql
+create table resource
+(
+    id          int auto_increment
+        primary key,
+    name        varchar(255) null,
+    type        varchar(255) null,
+    duration    varchar(255) null,
+    user_id     int null,
+    description text null,
+    price       decimal(10, 2) null,
+    view        int null,
+    created_at  datetime default CURRENT_TIMESTAMP null,
+    updated_at  datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
+    constraint resource_pk
+        unique (name, user_id),
+    constraint resource_ibfk_1
+        foreign key (user_id) references user (id)
+);
 
 create index user_id
     on resource (user_id);
- ```
+```
 
 #### media(媒体表, 资源拓展信息如图片视频等)
 
@@ -254,55 +256,89 @@ create table media
 
 create index resource_id
     on media (resource_id);
- ```
+```
 
 #### log(日志表, 记录用户操作日志)
 
- ```sql
- create table log
- (
-     id          int auto_increment
-         primary key,
-     user_id     int null,
-     resource_id int null,
-     action      varchar(255) null,
-     created_at  datetime default CURRENT_TIMESTAMP null,
-     constraint log_ibfk_1
-         foreign key (user_id) references user (id),
-     constraint log_ibfk_2
-         foreign key (resource_id) references resource (id)
- );
+```sql
+create table log
+(
+    id          int auto_increment
+        primary key,
+    user_id     int null,
+    resource_id int null,
+    action      varchar(255) null,
+    created_at  datetime default CURRENT_TIMESTAMP null,
+    constraint log_ibfk_1
+        foreign key (user_id) references user (id),
+    constraint log_ibfk_2
+        foreign key (resource_id) references resource (id)
+);
 
 create index resource_id
     on log (resource_id);
 
 create index user_id
     on log (user_id);
- ```
+```
 
 #### comment(评论表, 记录用户对资源的评价)
 
- ```sql
- create table comment
- (
-     id          int auto_increment
-         primary key,
-     user_id     int null,
-     resource_id int null,
-     content     text null,
-     created_at  datetime default CURRENT_TIMESTAMP null,
-     constraint comment_ibfk_1
-         foreign key (user_id) references user (id),
-     constraint comment_ibfk_2
-         foreign key (resource_id) references resource (id)
- );
+```sql
+create table comment
+(
+    id          int auto_increment
+        primary key,
+    user_id     int null,
+    resource_id int null,
+    content     text null,
+    created_at  datetime default CURRENT_TIMESTAMP null,
+    constraint comment_ibfk_1
+        foreign key (user_id) references user (id),
+    constraint comment_ibfk_2
+        foreign key (resource_id) references resource (id)
+);
 
 create index resource_id
     on comment (resource_id);
 
 create index user_id
     on comment (user_id);
- ```
+```
+
+#### favorite(收藏表, 记录用户收藏的资源)
+
+```sql
+create table favorite
+(
+    id          int auto_increment
+        primary key,
+    user_id     int null,
+    resource_id int null,
+    created_at  datetime default CURRENT_TIMESTAMP null,
+    constraint favorite_ibfk_1
+        foreign key (user_id) references user (id),
+    constraint favorite_ibfk_2
+        foreign key (resource_id) references resource (id)
+);
+```
+
+#### history(浏览历史表, 记录用户浏览的资源)
+
+```sql
+create table history
+(
+    id          int auto_increment
+        primary key,
+    user_id     int null,
+    resource_id int null,
+    created_at  datetime default CURRENT_TIMESTAMP null,
+    constraint history_ibfk_1
+        foreign key (user_id) references user (id),
+    constraint history_ibfk_2
+        foreign key (resource_id) references resource (id)
+);
+```
 
 ### 技术架构设计
 
@@ -405,7 +441,7 @@ create index user_id
                 - name: 资源名称
                 - type: 资源类型
                 - user: 发布者
-                - media: 媒体列表
+                - mediaUrl: 媒体url列表
                     - item: 媒体url
                         - url: url
                 - description: 描述
@@ -431,7 +467,7 @@ create index user_id
             - name: 资源名称
             - type: 资源类型
             - user: 发布者
-            - media: 媒体列表
+            - mediaUrl: 媒体url列表
                 - item: 媒体url
                     - url: url
             - description: 描述
@@ -457,7 +493,7 @@ create index user_id
             - name: 资源名称
             - type: 资源类型
             - user: 发布者
-            - media: 媒体列表
+            - mediaUrl: 媒体url列表
                 - item: 媒体url
                     - url: url
             - description: 描述
@@ -470,6 +506,58 @@ create index user_id
     - Method: DELETE
     - Request: id必须
         - id: 资源ID
+
+5. 推荐资源[示例](#推荐资源)
+    - URL: /resource/recommend
+    - Method: GET
+    - Response:
+        - data: 资源列表
+            - item: 资源信息
+                - id: 资源ID
+                - name: 资源名称
+                - type: 资源类型
+                - user: 发布者
+                - mediaUrl: 媒体url列表
+                    - item: 媒体url
+                        - url: url
+                - description: 描述
+                - price: 价格
+                - view: 浏览量
+                - duration: 租赁时长
+
+6. 收藏资源
+    - URL: /resource/favorite
+    - Method: POST
+    - Request:
+        - userId: 用户ID
+        - resourceId: 资源ID
+
+7. 取消收藏资源
+    - URL: /resource/unfavorite
+    - Method: DELETE
+    - Request:
+        - userId: 用户ID
+        - resourceId: 资源ID
+
+8. 收藏列表
+    - URL: /resource/favorite/list
+    - Method: GET
+    - Request:
+        - userId: 用户ID
+    - Response:
+        - data: 收藏列表
+            - item: 收藏资源信息
+                - id: 资源ID
+                - name: 资源名称
+                - type: 资源类型
+                - user: 发布者
+                - mediaUrl: 媒体url列表
+                    - item: 媒体url
+                        - url: url
+                - description: 描述
+                - price: 价格
+                - view: 浏览量
+                - duration: 租赁时长
 
 ### 文件相关
 
@@ -512,7 +600,7 @@ TODO
 
 ```javascript
 const data = {
-    phone: "11122223333",
+    phone: 11122223333,
 }
 fetch("http://kimin.cn:8080/user/login", {
     method: "POST",
@@ -573,6 +661,48 @@ fetch("http://kimin.cn:8080/resource/delete/1", {
 
 ```javascript
 fetch("http://kimin.cn:8080/resource/list", {
+    method: "GET",
+})
+```
+
+### 推荐资源
+
+```javascript
+fetch("http://kimin.cn:8080/resource/recommend", {
+    method: "GET",
+})
+```
+
+### 收藏资源
+
+```javascript
+const data = {
+    userId: 1,
+    resourceId: 1,
+}
+fetch("http://kimin.cn:8080/resource/favorite", {
+    method: "POST",
+    body: JSON.stringify({data})
+})
+```
+
+### 取消收藏资源
+
+```javascript
+const data = {
+    userId: 1,
+    resourceId: 1,
+}
+fetch("http://kimin.cn:8080/resource/unfavorite", {
+    method: "POST",
+    body: JSON.stringify({data})
+})
+```
+
+### 收藏列表
+
+```javascript
+fetch("http://kimin.cn:8080/resource/favorite/list?userId=1", {
     method: "GET",
 })
 ```
