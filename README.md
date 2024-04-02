@@ -297,6 +297,7 @@ create table comment
         primary key,
     user_id     int null,
     resource_id int null,
+    parent_id   int null,
     content     text null,
     created_at  datetime default CURRENT_TIMESTAMP null,
     constraint comment_ibfk_1
@@ -611,7 +612,38 @@ create table history
 
 ### 评论相关
 
-TODO
+1. 发布评论
+    - URL: /comment/publish
+    - Method: POST
+    - Request:
+        - resourceId: 资源ID
+        - content: 评论内容
+        - parentId: 父评论ID(回复评论时使用)
+
+2. 删除评论
+    - URL: /comment/delete/{id}
+    - Method: DELETE
+    - Request:
+        - id: 评论ID
+
+3. 获取评论列表
+    - URL: /comment/get/{resourceId}
+    - Method: GET
+    - Request:
+        - resourceId: 资源ID
+    - Response:
+        - data: 评论列表
+            - item: 评论信息
+                - id: 评论ID
+                - user: 评论者
+                - content: 评论内容
+                - created_at: 评论时间
+                - children: 子评论列表
+                    - item: 子评论信息
+                        - id: 评论ID
+                        - user: 评论者
+                        - content: 评论内容
+                        - created_at: 评论时间
 
 ## 5 开发计划
 
@@ -768,5 +800,47 @@ fetch("http://kimin.cn:8080/media/upload", {
 ```javascript
 fetch("http://kimin.cn:8080/media/delete/1/1.png", {
     method: "DELETE",
+})
+```
+### 发布评论
+
+```javascript
+const data = {
+    resourceId: 1,
+    content: "评论内容",
+}
+fetch("http://kimin.cn:8080/comment/publish", {
+    method: "POST",
+    body: JSON.stringify({data})
+})
+```
+
+### 回复评论
+
+```javascript
+const data = {
+    resourceId: 1,
+    content: "评论内容",
+    parentId: 1,
+}
+fetch("http://kimin.cn:8080/comment/publish", {
+    method: "POST",
+    body: JSON.stringify({data})
+})
+```
+
+### 删除评论
+
+```javascript
+fetch("http://kimin.cn:8080/comment/delete/1", {
+    method: "DELETE",
+})
+```
+
+### 获取评论列表
+
+```javascript
+fetch("http://kimin.cn:8080/comment/get/1", {
+    method: "GET",
 })
 ```
