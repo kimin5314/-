@@ -52,9 +52,15 @@
     4. [修改资源信息](#修改资源信息)
     5. [删除资源](#删除资源)
     6. [获取资源列表](#获取资源列表)
-    7. [上传文件](#上传文件)
-    8. [访问文件](#访问文件)
-    9. [删除文件](#删除文件)
+    7. [推荐资源](#推荐资源)
+    8. [收藏资源](#收藏资源)
+    9. [取消收藏资源](#取消收藏资源)
+    10. [收藏列表](#收藏列表)
+    11. [资源详情](#资源详情)
+    12. [浏览历史](#浏览历史)
+    13. [上传文件](#上传文件)
+    14. [访问文件](#访问文件)
+    15. [删除文件](#删除文件)
 
 ## 开发流程
 
@@ -410,10 +416,9 @@ create table history
             - role: 角色
 
 2. 更新用户信息[示例](#修改用户信息)
-    - URL: /user/update/{id}
+    - URL: /user/update
     - Method: PUT
-    - Request: id必须, 剩余参数可选
-        - id: 用户ID
+    - Request:
         - phone: 手机号
         - name: 用户名
         - avatar: 头像(通过Media接口上传)
@@ -455,7 +460,6 @@ create table history
     - Request:
         - name: 资源名称
         - type: 资源类型
-        - userId: 发布者id
         - description: 描述
         - price: 价格
         - view: 浏览量
@@ -466,10 +470,8 @@ create table history
             - id: 资源ID
             - name: 资源名称
             - type: 资源类型
-            - user: 发布者
-            - mediaUrl: 媒体url列表
-                - item: 媒体url
-                    - url: url
+            - userId: 发布者ID
+            - cover: 封面图片url
             - description: 描述
             - price: 价格
             - view: 浏览量
@@ -493,9 +495,7 @@ create table history
             - name: 资源名称
             - type: 资源类型
             - user: 发布者
-            - mediaUrl: 媒体url列表
-                - item: 媒体url
-                    - url: url
+            - cover: 封面图片url
             - description: 描述
             - price: 价格
             - view: 浏览量
@@ -517,33 +517,27 @@ create table history
                 - name: 资源名称
                 - type: 资源类型
                 - user: 发布者
-                - mediaUrl: 媒体url列表
-                    - item: 媒体url
-                        - url: url
+                - cover: 封面图片url
                 - description: 描述
                 - price: 价格
                 - view: 浏览量
                 - duration: 租赁时长
 
-6. 收藏资源
-    - URL: /resource/favorite
+6. 收藏资源[示例](#收藏资源)
+    - URL: /resource/favorite/{resourceId}
     - Method: POST
     - Request:
-        - userId: 用户ID
         - resourceId: 资源ID
 
-7. 取消收藏资源
-    - URL: /resource/unfavorite
+7. 取消收藏资源[示例](#取消收藏资源)
+    - URL: /resource/unfavorite/{resourceId}
     - Method: DELETE
     - Request:
-        - userId: 用户ID
         - resourceId: 资源ID
 
-8. 收藏列表
+8. 收藏列表[示例](#收藏列表)
     - URL: /resource/favorite/list
     - Method: GET
-    - Request:
-        - userId: 用户ID
     - Response:
         - data: 收藏列表
             - item: 收藏资源信息
@@ -551,9 +545,42 @@ create table history
                 - name: 资源名称
                 - type: 资源类型
                 - user: 发布者
-                - mediaUrl: 媒体url列表
-                    - item: 媒体url
-                        - url: url
+                - cover: 封面图片url
+                - description: 描述
+                - price: 价格
+                - view: 浏览量
+                - duration: 租赁时长
+9. 资源详情[示例](#资源详情)
+    - URL: /resource/detail/{id}
+    - Method: GET
+    - Request:
+        - id: 资源ID
+    - Response:
+        - data: 资源信息
+            - id: 资源ID
+            - name: 资源名称
+            - type: 资源类型
+            - user: 发布者
+            - cover: 封面图片url
+            - description: 描述
+            - price: 价格
+            - view: 浏览量
+            - duration: 租赁时长
+            - mediaUrl: 媒体url列表
+                - item: 媒体url
+                    - url: url
+
+10. 浏览历史[示例](#浏览历史)
+    - URL: /resource/history
+    - Method: GET
+    - Response:
+        - data: 浏览历史列表 按时间降序
+            - item: 浏览资源信息
+                - id: 资源ID
+                - name: 资源名称
+                - type: 资源类型
+                - user: 发布者
+                - cover: 封面图片url
                 - description: 描述
                 - price: 价格
                 - view: 浏览量
@@ -575,7 +602,7 @@ create table history
         - prefixPath: 文件路径(头像为avatar, 资源图片/视频为对应资源id)
         - filename: 文件名
 
-3. 删除文[示例](#删除文件)
+3. 删除文件[示例](#删除文件)
     - URL: /media/delete/{prefixPath:.+}/{filename:.+}
     - Method: DELETE
     - Request:
@@ -612,10 +639,9 @@ fetch("http://kimin.cn:8080/user/login", {
 
 ```javascript
 const data = {
-    id: 1,
     name: "张三",
 }
-fetch("http://kimin.cn:8080/user/update/1", {
+fetch("http://kimin.cn:8080/user/update", {
     method: "PUT",
     body: JSON.stringify({data})
 })
@@ -627,7 +653,7 @@ fetch("http://kimin.cn:8080/user/update/1", {
 const data = {
     name: "资源1",
     type: "类型1",
-    userId: 1,
+    description: "描述1",
 }
 fetch("http://kimin.cn:8080/resource/publish", {
     method: "POST",
@@ -642,6 +668,9 @@ const data = {
     id: 1,
     name: "资源2",
     type: "类型2",
+    description: "描述1",
+    view: 1,
+    price: 1000
 }
 fetch("http://kimin.cn:8080/resource/update/1", {
     method: "PUT",
@@ -676,33 +705,41 @@ fetch("http://kimin.cn:8080/resource/recommend", {
 ### 收藏资源
 
 ```javascript
-const data = {
-    userId: 1,
-    resourceId: 1,
-}
-fetch("http://kimin.cn:8080/resource/favorite", {
+fetch("http://kimin.cn:8080/resource/favorite/{1}", {
     method: "POST",
-    body: JSON.stringify({data})
+    body: JSON.stringify()
 })
 ```
 
 ### 取消收藏资源
 
 ```javascript
-const data = {
-    userId: 1,
-    resourceId: 1,
-}
-fetch("http://kimin.cn:8080/resource/unfavorite", {
+fetch("http://kimin.cn:8080/resource/unfavorite/{1}", {
     method: "POST",
-    body: JSON.stringify({data})
+    body: JSON.stringify()
 })
 ```
 
 ### 收藏列表
 
 ```javascript
-fetch("http://kimin.cn:8080/resource/favorite/list?userId=1", {
+fetch("http://kimin.cn:8080/resource/favorite/list", {
+    method: "GET",
+})
+```
+
+### 资源详情
+
+```javascript
+fetch("http://kimin.cn:8080/resource/detail/1", {
+    method: "GET",
+})
+```
+
+### 浏览历史
+
+```javascript
+fetch("http://kimin.cn:8080/resource/history", {
     method: "GET",
 })
 ```
