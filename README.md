@@ -587,6 +587,33 @@ create table history
                 - view: 浏览量
                 - duration: 租赁时长
 
+11. 资源搜索[示例](#资源搜索)
+    - URL: /resource/search
+    - Method: GET
+    - Request:
+        - keyword: 关键词
+    - Response:
+        - data: 资源列表
+            - item: 资源信息
+                - id: 资源ID
+                - name: 资源名称
+                - type: 资源类型
+                - user: 发布者
+                - cover: 封面图片url
+                - description: 描述
+                - price: 价格
+                - view: 浏览量
+                - duration: 租赁时长
+
+12. 搜索列表补全[示例](#搜索列表补全)
+    - URL: /resource/search/autoCompleteList
+    - Method: GET
+    - Request:
+        - keyword: 关键词
+    - Response:
+        - data: 推荐关键词列表
+            - item: 关键词
+
 ### 文件相关
 
 1. 上传文件[示例](#上传文件)
@@ -776,6 +803,22 @@ fetch("http://kimin.cn:8080/resource/history", {
 })
 ```
 
+### 资源搜索
+
+```javascript
+fetch("http://kimin.cn:8080/resource/search?keyword=1", {
+    method: "GET",
+})
+```
+
+### 搜索列表补全
+
+```javascript
+fetch("http://kimin.cn:8080/resource/search/autoCompleteList?keyword=resource", {
+    method: "GET",
+})
+```
+
 ### 上传文件
 
 ```javascript
@@ -802,6 +845,7 @@ fetch("http://kimin.cn:8080/media/delete/1/1.png", {
     method: "DELETE",
 })
 ```
+
 ### 发布评论
 
 ```javascript
