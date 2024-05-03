@@ -417,9 +417,10 @@ create table history
             - role: 角色
 
 2. 更新用户信息[示例](#修改用户信息)
-    - URL: /user/update
+    - URL: /user/update/{id}
     - Method: PUT
     - Request:
+        - id: 用户ID
         - phone: 手机号
         - name: 用户名
         - avatar: 头像(通过Media接口上传)
@@ -434,12 +435,11 @@ create table history
 
 ### 资源相关
 
-1. 获取资源列表
-    - URL: /resource/list
+1. 获取用户发布的资源列表[示例](#获取资源列表)
+    - URL: /resource/list/{userid}
     - Method: GET
     - Request:
-        - page: 页码
-        - size: 每页数量
+        - userId: 用户ID
     - Response:
         - data: 资源列表
             - item: 资源信息
@@ -447,9 +447,7 @@ create table history
                 - name: 资源名称
                 - type: 资源类型
                 - user: 发布者
-                - mediaUrl: 媒体url列表
-                    - item: 媒体url
-                        - url: url
+                - cover: 封面图片url
                 - description: 描述
                 - price: 价格
                 - view: 浏览量
@@ -459,9 +457,13 @@ create table history
     - URL: /resource/publish
     - Method: POST
     - Request:
+        - userId: 发布者ID
         - name: 资源名称
         - type: 资源类型
         - description: 描述
+        - address: 地址
+            - latitude: 纬度
+            - longitude: 经度
         - price: 价格
         - view: 浏览量
         - duration: 租赁时长
@@ -474,6 +476,9 @@ create table history
             - userId: 发布者ID
             - cover: 封面图片url
             - description: 描述
+            - address: 地址
+                - latitude: 纬度
+                - longitude: 经度
             - price: 价格
             - view: 浏览量
             - duration: 租赁时长
@@ -525,20 +530,24 @@ create table history
                 - duration: 租赁时长
 
 6. 收藏资源[示例](#收藏资源)
-    - URL: /resource/favorite/{resourceId}
+    - URL: /resource/favorite/{userId}/{resourceId}
     - Method: POST
     - Request:
+        - userId: 用户ID
         - resourceId: 资源ID
 
 7. 取消收藏资源[示例](#取消收藏资源)
-    - URL: /resource/unfavorite/{resourceId}
+    - URL: /resource/unfavorite/{userId}/{resourceId}
     - Method: DELETE
     - Request:
+        - userId: 用户ID
         - resourceId: 资源ID
 
 8. 收藏列表[示例](#收藏列表)
-    - URL: /resource/favorite/list
+    - URL: /resource/favoriteList/{userId}
     - Method: GET
+    - Request:
+        - userId: 用户ID
     - Response:
         - data: 收藏列表
             - item: 收藏资源信息
@@ -552,10 +561,11 @@ create table history
                 - view: 浏览量
                 - duration: 租赁时长
 9. 资源详情[示例](#资源详情)
-    - URL: /resource/detail/{id}
+    - URL: /resource/detail/{userId}/{resourceId}
     - Method: GET
     - Request:
-        - id: 资源ID
+        - resourceId: 资源ID
+        - userId: 用户ID
     - Response:
         - data: 资源信息
             - id: 资源ID
@@ -572,8 +582,10 @@ create table history
                     - url: url
 
 10. 浏览历史[示例](#浏览历史)
-    - URL: /resource/history
+    - URL: /resource/history/{userId}
     - Method: GET
+    - Request:
+        - userId: 用户ID
     - Response:
         - data: 浏览历史列表 按时间降序
             - item: 浏览资源信息
@@ -614,10 +626,27 @@ create table history
         - data: 推荐关键词列表
             - item: 关键词
 
+13. 资源简要信息[示例](#资源简要信息)
+    - URL: /resource/get/{resourceId}
+    - Method: GET
+    - Request:
+        - resourceId: 资源ID
+    - Response:
+        - data: 资源信息
+            - id: 资源ID
+            - name: 资源名称
+            - type: 资源类型
+            - user: 发布者
+            - cover: 封面图片url
+            - description: 描述
+            - price: 价格
+            - view: 浏览量
+            - duration: 租赁时长
+
 ### 文件相关
 
 1. 上传文件[示例](#上传文件)
-    - URL: /media/upload
+    - URL: /media/upload/{resourceId}
     - Method: POST
     - Request:
         - file: 文件
@@ -639,21 +668,22 @@ create table history
 
 ### 评论相关
 
-1. 发布评论
+1. 发布评论[示例](#发布评论)
     - URL: /comment/publish
     - Method: POST
     - Request:
+        - userId: 用户ID
         - resourceId: 资源ID
         - content: 评论内容
         - parentId: 父评论ID(回复评论时使用)
 
-2. 删除评论
+2. 删除评论[示例](#删除评论)
     - URL: /comment/delete/{id}
     - Method: DELETE
     - Request:
         - id: 评论ID
 
-3. 获取评论列表
+3. 获取评论列表[示例](#获取评论列表)
     - URL: /comment/get/{resourceId}
     - Method: GET
     - Request:
@@ -700,7 +730,7 @@ fetch("http://kimin.cn:8080/user/login", {
 const data = {
     name: "张三",
 }
-fetch("http://kimin.cn:8080/user/update", {
+fetch("http://kimin.cn:8080/user/update/1", {
     method: "PUT",
     body: JSON.stringify({data})
 })
@@ -713,6 +743,10 @@ const data = {
     name: "资源1",
     type: "类型1",
     description: "描述1",
+    address: {
+        latitude: 9.999,
+        longitude: 1.111,
+    }
 }
 fetch("http://kimin.cn:8080/resource/publish", {
     method: "POST",
@@ -729,7 +763,11 @@ const data = {
     type: "类型2",
     description: "描述1",
     view: 1,
-    price: 1000
+    price: 1000,
+    address: {
+        latitude: 9.999,
+        longitude: 1.111,
+    }
 }
 fetch("http://kimin.cn:8080/resource/update/1", {
     method: "PUT",
@@ -745,10 +783,10 @@ fetch("http://kimin.cn:8080/resource/delete/1", {
 })
 ```
 
-### 获取资源列表
+### 获取用户发布的资源列表
 
 ```javascript
-fetch("http://kimin.cn:8080/resource/list", {
+fetch("http://kimin.cn:8080/resource/list/1", {
     method: "GET",
 })
 ```
@@ -764,7 +802,7 @@ fetch("http://kimin.cn:8080/resource/recommend", {
 ### 收藏资源
 
 ```javascript
-fetch("http://kimin.cn:8080/resource/favorite/{1}", {
+fetch("http://kimin.cn:8080/resource/favorite/1", {
     method: "POST",
     body: JSON.stringify()
 })
@@ -773,7 +811,7 @@ fetch("http://kimin.cn:8080/resource/favorite/{1}", {
 ### 取消收藏资源
 
 ```javascript
-fetch("http://kimin.cn:8080/resource/unfavorite/{1}", {
+fetch("http://kimin.cn:8080/resource/unfavorite/1", {
     method: "POST",
     body: JSON.stringify()
 })
@@ -782,7 +820,7 @@ fetch("http://kimin.cn:8080/resource/unfavorite/{1}", {
 ### 收藏列表
 
 ```javascript
-fetch("http://kimin.cn:8080/resource/favorite/list", {
+fetch("http://kimin.cn:8080/resource/favorite/list/1", {
     method: "GET",
 })
 ```
@@ -790,7 +828,7 @@ fetch("http://kimin.cn:8080/resource/favorite/list", {
 ### 资源详情
 
 ```javascript
-fetch("http://kimin.cn:8080/resource/detail/1", {
+fetch("http://kimin.cn:8080/resource/detail/1/5", {
     method: "GET",
 })
 ```
@@ -798,7 +836,7 @@ fetch("http://kimin.cn:8080/resource/detail/1", {
 ### 浏览历史
 
 ```javascript
-fetch("http://kimin.cn:8080/resource/history", {
+fetch("http://kimin.cn:8080/resource/history/1", {
     method: "GET",
 })
 ```
@@ -819,14 +857,21 @@ fetch("http://kimin.cn:8080/resource/search/autoCompleteList?keyword=resource", 
 })
 ```
 
+### 资源简要信息
+
+```javascript
+fetch("http://kimin.cn:8080/resource/get/1", {
+    method: "GET",
+})
+```
+
 ### 上传文件
 
 ```javascript
 const data = {
     file: null, //通过input["file"].files[0]获取
-    resourceId: 1,
 }
-fetch("http://kimin.cn:8080/media/upload", {
+fetch("http://kimin.cn:8080/media/upload/1", {
     method: "POST",
     body: JSON.stringify({data})
 })
@@ -850,6 +895,7 @@ fetch("http://kimin.cn:8080/media/delete/1/1.png", {
 
 ```javascript
 const data = {
+    userId: 1,
     resourceId: 1,
     content: "评论内容",
 }
