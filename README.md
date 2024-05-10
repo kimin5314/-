@@ -779,7 +779,7 @@ fetch("http://kimin.cn:8080/resource/update/1", {
 
 ```javascript
 fetch("http://kimin.cn:8080/resource/delete/1", {
-    method: "DELETE",
+    method: "POST",
 })
 ```
 
