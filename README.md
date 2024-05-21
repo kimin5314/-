@@ -1,4 +1,4 @@
-# 乡村闲置资源
+****# 乡村闲置资源
 
 ## 目录
 
@@ -28,6 +28,9 @@
             - [media(媒体表, 资源拓展信息如图片视频等)](#media媒体表-资源拓展信息如图片视频等)
             - [log(日志表, 记录用户操作日志)](#log日志表-记录用户操作日志)
             - [comment(评论表, 记录用户对资源的评价)](#comment评论表-记录用户对资源的评价)
+            - [favorite(收藏表, 记录用户收藏的资源)](#favorite收藏表-记录用户收藏的资源)
+            - [history(浏览历史表, 记录用户浏览的资源)](#history浏览历史表-记录用户浏览的资源)
+            - [message(消息表, 记录用户消息)](#message消息表-记录用户消息)
         4. [技术架构设计](#技术架构设计)
             - [整体架构](#整体架构)
             - [系统组件](#系统组件)
@@ -40,6 +43,7 @@
         - [资源相关](#资源相关)
         - [文件相关](#文件相关)
         - [评论相关](#评论相关)
+        - [IM相关](#IM相关)
     5. [开发计划](#5-开发计划)
     6. [测试](#6-测试)
     7. [部署上线](#7-部署上线)
@@ -344,6 +348,24 @@ create table history
         foreign key (user_id) references user (id),
     constraint history_ibfk_2
         foreign key (resource_id) references resource (id)
+);
+```
+
+#### message(消息表, 记录用户消息)
+
+```sql
+create table message
+(
+    id          int auto_increment
+        primary key,
+    sender_id   int null,
+    receiver_id int null,
+    content     text null,
+    created_at  datetime default CURRENT_TIMESTAMP null,
+    constraint message_user_id_fk
+        foreign key (sender_id) references user (id),
+    constraint message_user_id_fk_2
+        foreign key (receiver_id) references user (id)
 );
 ```
 
@@ -702,6 +724,23 @@ create table history
                         - content: 评论内容
                         - created_at: 评论时间
 
+### IM相关
+
+1. 发送消息[示例](#发送消息)
+2. 获取消息记录[示例](#获取消息记录)
+    - URL: /message/dialogue/{receiverId}/{senderId}
+    - Method: GET
+    - Request:
+        - receiverId: 接收者ID
+        - senderId: 发送者ID
+    - Response:
+        - data: 消息列表
+            - item: 消息信息
+                - senderId: 发送者
+                - receiverId: 接收者
+                - content: 消息内容
+                - time: 消息时间
+
 ## 5 开发计划
 
 ## 6 测试
@@ -887,7 +926,7 @@ fetch("http://kimin.cn:8080/media/upload/1", {
 
 ```javascript
 fetch("http://kimin.cn:8080/media/delete/1/1.png", {
-    method: "DELETE",
+    method: "POST",
 })
 ```
 
@@ -923,7 +962,7 @@ fetch("http://kimin.cn:8080/comment/publish", {
 
 ```javascript
 fetch("http://kimin.cn:8080/comment/delete/1", {
-    method: "DELETE",
+    method: "POST",
 })
 ```
 
@@ -931,6 +970,39 @@ fetch("http://kimin.cn:8080/comment/delete/1", {
 
 ```javascript
 fetch("http://kimin.cn:8080/comment/get/1", {
+    method: "GET",
+})
+```
+
+### 发送消息
+
+```javascript
+// 补充获取id的具体逻辑
+var userId = 1;
+var receiverId = 2;
+var ws = new WebSocket("ws://kimin.cn:8080/message?userId=" + userId);
+ws.onmessage = function (event) {
+    // 向聊天框添加消息
+    var chat = document.getElementById('chat');
+    var message = document.createElement('div');
+    // event.data为消息内容
+    message.textContent = event.data;
+    chat.appendChild(message);
+}
+
+function sendMessage() {
+    var input = document.getElementById('message');
+    // 格式为receiverId:message
+    var msg = receiverId + ":" + input.value;
+    ws.send(msg);
+    input.value = '';
+}
+```
+
+### 获取消息记录
+
+```javascript
+fetch("http://kimin.cn:8080/message/dialogue/1/2", {
     method: "GET",
 })
 ```
