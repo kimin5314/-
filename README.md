@@ -672,7 +672,7 @@ create table message
     - Method: POST
     - Request:
         - file: 文件
-        - resourceId: 资源ID
+        - resourceId: 资源ID(上传用户头像时resourceId设置为avatar)
 
 2. 访问文件[示例](#访问文件)
     - URL: /media/{prefixPath:.+}/{filename:.+}
