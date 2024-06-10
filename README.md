@@ -1,4 +1,4 @@
-# 乡村闲置资源
+****# 乡村闲置资源
 
 ## 目录
 
@@ -489,6 +489,8 @@ create table message
         - price: 价格
         - view: 浏览量
         - duration: 租赁时长
+        - decoration: 装修情况
+        - equipment: 周边设备
         - _media: 媒体资源通过Media接口上传_
     - Response:
         - data: 资源信息
@@ -503,6 +505,8 @@ create table message
                 - longitude: 经度
             - price: 价格
             - view: 浏览量
+            - decoration: 装修情况
+            - equipment: 周边设备
             - duration: 租赁时长
 
 3. 修改资源信息[示例](#修改资源信息)
@@ -516,6 +520,8 @@ create table message
         - price: 价格
         - view: 浏览量
         - duration: 租赁时长
+        - decoration: 装修情况
+        - equipment: 周边设备
         - _media: 媒体资源通过Media接口上传_
     - Response:
         - data: 资源信息
@@ -528,6 +534,8 @@ create table message
             - price: 价格
             - view: 浏览量
             - duration: 租赁时长
+            - decoration: 装修情况
+            - equipment: 周边设备
 
 4. 删除资源[示例](#删除资源)
     - URL: /resource/delete/{id}
@@ -664,6 +672,34 @@ create table message
             - price: 价格
             - view: 浏览量
             - duration: 租赁时长
+            - equipment: 周边设备
+            - decoration: 装修情况
+
+14. 获取未审核资源列表[示例](#获取未审核资源列表)
+    - URL: /resource/toCheck
+    - Method: GET
+    - Response:
+        - data: 资源列表
+            - item: 资源信息
+                - id: 资源ID
+                - name: 资源名称
+                - type: 资源类型
+                - user: 发布者
+                - cover: 封面图片url
+                - description: 描述
+                - price: 价格
+                - view: 浏览量
+                - duration: 租赁时长
+                - created_at: 发布时间
+                - equipment: 周边设备
+                - decoration: 装修情况
+
+15. 审核资源[示例](#审核资源)
+    - URL: /resource/check/{id}/{status}
+    - Method: POST
+    - Request:
+        - id: 资源ID
+        - status: 审核状态("unchecked", "checked", "rejected")
 
 ### 文件相关
 
@@ -785,7 +821,11 @@ const data = {
     address: {
         latitude: 9.999,
         longitude: 1.111,
-    }
+    },
+    price: "80-100",
+    decoration: "精装",
+    equipment: "学校;超市",
+    duration: "1w", // 一周
 }
 fetch("http://kimin.cn:8080/resource/publish", {
     method: "POST",
@@ -806,7 +846,10 @@ const data = {
     address: {
         latitude: 9.999,
         longitude: 1.111,
-    }
+    },
+    decoration: "精装",
+    equipment: "学校;超市",
+    duration: "1m", // 一月
 }
 fetch("http://kimin.cn:8080/resource/update/1", {
     method: "PUT",
@@ -901,6 +944,22 @@ fetch("http://kimin.cn:8080/resource/search/autoCompleteList?keyword=resource", 
 ```javascript
 fetch("http://kimin.cn:8080/resource/get/1", {
     method: "GET",
+})
+```
+
+### 获取未审核资源列表
+
+```javascript
+fetch("http://kimin.cn:8080/resource/toCheck", {
+    method: "GET",
+})
+```
+
+### 审核资源
+
+```javascript
+fetch("http://kimin.cn:8080/resource/check/1/checked", {
+    method: "POST",
 })
 ```
 
